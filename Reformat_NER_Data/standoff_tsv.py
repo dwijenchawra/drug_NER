@@ -44,6 +44,8 @@ def standoff_to_tsv(ann, txt, out):
                 i = j
                 annotated = True
         j += 1
+    
+    reg = "^[^a-zA-Z0-9]+$"
         
     #splitting into words and adding labels
     output = []
@@ -51,7 +53,7 @@ def standoff_to_tsv(ann, txt, out):
     for s,t in split:
         s = s.replace('@@@', '. ')
         s = s.replace('^^', '. ')
-        tokens = nltk.word_tokenize(s)
+        tokens = nltk.word_tokenize(s) 
         if t == 'O':
             for token in tokens:
                 if token == '.':
