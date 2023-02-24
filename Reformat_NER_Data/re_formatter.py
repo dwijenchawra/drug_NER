@@ -16,7 +16,10 @@ def re_formatter(ann, txt, out):
     #creating a dictionary with every non drug-drug relation from relations
     relations_per_drug = {}
     for relation in relations.values():
-        relations_per_drug[relation.subj] = relation.obj
+        if relation.subj in relations_per_drug:
+            relations_per_drug[relation.subj].append(relation.obj)
+        else:
+            relations_per_drug[relation.subj] = [relation.obj]
         
     #mapping every individual character with its label in a new list based off the span of entities    
     char_ann = [('O', '', '') for i in range(len(txt))]
@@ -129,7 +132,7 @@ def re_formatter(ann, txt, out):
                 dict["relation_tags"] = relation_tags
                 dict["entity_tags"] = ['O' if (s[1][i] == 'O') else (s[1][i].split('-')[1]) for i in range(len(s[1]))]
                 dict["relation_type"] = subj.split('-')[1] + '-' + obj.split('-')[1]
-                dict["is_related"] = 1 if (relations_per_drug[subj.split('-')[0]] == obj.split('-')[0]) else 0
+                dict["is_related"] = 1 if (obj.split('-')[0] in relations_per_drug[subj.split('-')[0]]) else 0
                 output.append(dict)
      
     with open(out, "w") as final:
