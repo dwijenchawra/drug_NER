@@ -1,49 +1,36 @@
 import os
 import json
+import sys
+# sys.path.append("../")
+# sys.path.append(os.getcwd())
 from argparse import ArgumentParser
-import time
+import numpy as np
 
 import torch
 from datasets import Dataset
-from transformers import DataCollatorForTokenClassification, BertForTokenClassification, BertTokenizer 
+from transformers import DataCollatorForTokenClassification, BertForTokenClassification, BertTokenizer, DefaultDataCollator
 from transformers import TrainingArguments, Trainer
-from sklearn.model_selection import train_test_split
-import deepspeed
-from ner_utilities import *
+from bert.ner.utilities import *
 
-os.environ["MASTER_ADDR"] = "localhost"
-# os.environ["MASTER_PORT"] = "9994"  # modify if RuntimeError: Address already in use
-# os.environ["RANK"] = "0"
-# os.environ["LOCAL_RANK"] = "0"
-# os.environ["WORLD_SIZE"] = "1"
-
-# for torchrun
-# local_rank = int(os.environ["LOCAL_RANK"])
-# print("localrank -- " + str(local_rank))
-
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
-
-configFilePath = "../properties/biobert_barilla_properties.json"
+import ray
+from ray import tune
+from ray.tune import CLIReporter
+from ray.tune.schedulers import ASHAScheduler
 
 def main():
+    
+    ray.init(ignore_reinit_error=True, num_cpus=12)
+
     parser = ArgumentParser()
-    # parser.add_argument("-config", help="Path to configurations file.")
-    # args = parser.parse_args()
+    parser.add_argument("-config", help="Path to configurations file.")
+    args = parser.parse_args()
 
-    parser.add_argument('--local_rank', type=int, default=-1,
-                    help='local rank passed from distributed launcher')
-    # Include DeepSpeed configuration arguments
-    parser = deepspeed.add_config_arguments(parser)
-    cmd_args = parser.parse_args()
-
-
-
-    with open(configFilePath) as config_file:
+    with open(args.config, 'r') as config_file:
         config = json.load(config_file)
         config_file.close()
     model_params = config["model_params"]
     train_params = config["train_params"]
-    
+
     # Set the device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -53,14 +40,16 @@ def main():
 
     # Load Data
     data_path = train_params["data_dir"]
-    train_data_path = os.path.join(data_path, "train_data.tsv")
-    test_data_path = os.path.join(data_path, "test_data.tsv")
-    train_data = load_data(train_data_path)
-    test_data = load_data(test_data_path)
+    train_data_path = os.path.join(data_path, "train.tsv")
+    test_data_path = os.path.join(data_path, "test.tsv")
+    raw_train_data = load_data(train_data_path)
+    raw_test_data = load_data(test_data_path)
+    raw_train_data = [(i, j) for i, j in raw_train_data if len(i) > 2 and not all(k=="O" for k in j)]
+    raw_test_data = [(i, j) for i, j in raw_test_data if len(i) > 2 and not all(k=="O" for k in j)]
 
     # Tokenize data
-    train_data = [tokenize_with_labels(tokenizer, i, j, '[PAD]') for i, j in train_data if len(i) > 2]
-    test_data = [tokenize_with_labels(tokenizer, i, j, '[PAD]') for i, j in test_data if len(i) > 2]
+    train_data = [tokenize_with_labels(tokenizer, i, j, '[PAD]') for i, j in raw_train_data if len(i) > 2]
+    test_data = [tokenize_with_labels(tokenizer, i, j, '[PAD]') for i, j in raw_test_data if len(i) > 2]
     train_sents, train_labels = zip(*train_data)
     test_sents, test_labels = zip(*test_data)
     train_labels = remove_bad_labels(train_labels, config["bad_labels"])
@@ -90,9 +79,10 @@ def main():
     train_tags = np.array([pad_sequence(i, value=tag2idx['[PAD]']) for i in train_tags], dtype='int32')
     attention_masks = np.array([[int(j != 0) for j in i] for i in train_inputs])
 
-    # Split into Train and Validation for training
-    train_data, val_data = train_test_split(
-        list(zip(train_inputs, train_tags, attention_masks)), test_size=0.1
+    raw_train_tags = [j for i, j in raw_train_data]
+    train_tag_counts = get_entity_type_counts(raw_train_tags, tag2idx)
+    train_data, val_data = get_train_test_split_multi_label(
+        train_inputs, train_tags, attention_masks, test_size=0.1, stratify=train_tag_counts
         )
     train_inputs, train_tags, train_masks = zip(*train_data)
     val_inputs, val_tags, val_masks = zip(*val_data)
@@ -107,34 +97,77 @@ def main():
         save_strategy='steps',
         save_total_limit=2,
         dataloader_drop_last=True,
-        # logging_steps=train_params["ckpt_steps"],
-        # save_steps=train_params["ckpt_steps"],
+        logging_steps=train_params["ckpt_steps"],
+        save_steps=train_params["ckpt_steps"],
         learning_rate=train_params["learning_rate"],
         weight_decay=train_params["weight_decay"],
+        fp16=True,
         per_device_train_batch_size=train_params["batch_size"],
         per_device_eval_batch_size=train_params["batch_size"],
         num_train_epochs=train_params["num_epochs"],
-        metric_for_best_model="loss",
-        load_best_model_at_end=True
-        # deepspeed="deepspeed_config.json"
+        load_best_model_at_end=True,
+        report_to="tensorboard",
+        metric_for_best_model="f1",
+        greater_is_better=True 
         )
     
-    model = BertForTokenClassification.from_pretrained(model_params["pretrain_path"], num_labels=len(tag2idx))
-
-    # model = torch.nn.DataParallel(model, device_ids=[0,1,2,3])
-    model = torch.nn.parallel.DistrubutedDataParallel(model, device_ids=[0,1,2,3], find_unused_parameters=False)
-
-    # print("isparallelizable   --    " + str(model.is_parallelizable))
-    data_collator = DataCollatorForTokenClassification(tokenizer)
+    def get_model():
+        model = BertForTokenClassification.from_pretrained(model_params["pretrain_path"], num_labels=len(tag2idx))
+        return model
+    
+    # data_collator = DataCollatorForTokenClassification(tokenizer)
+    data_collator = DefaultDataCollator()
     trainer = Trainer(
-        model,
-        train_args,
+        model_init=get_model,
+        args=train_args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         data_collator=data_collator,
         tokenizer=tokenizer,
         compute_metrics=lambda x: compute_metrics(x, tag2idx)
         )
+    
+    tune_config = {
+        "per_device_train_batch_size": tune.choice([16,32]),
+        "per_device_eval_batch_size": tune.choice([16,32]),
+        "num_train_epochs": 5,
+        "weight_decay": tune.loguniform(0.1, 0.0001),
+        "learning_rate": tune.uniform(1e-5, 5e-5)
+    }
+    
+    scheduler = ASHAScheduler(
+        time_attr='training_iteration',
+        metric='eval_f1',
+        mode='max',
+    )
+    
+    reporter = CLIReporter(
+        parameter_columns={
+            "weight_decay": "w_decay",
+            "learning_rate": "lr",
+            "per_device_train_batch_size": "train_bs/gpu",
+            "num_train_epochs": "num_epochs",
+        },
+        metric_columns=["eval_f1", "eval_acc", "eval_loss", "epoch", "training_iteration"],
+    )
+    
+    best_run = trainer.hyperparameter_search(
+        hp_space=lambda _: tune_config,
+        backend='ray',
+        n_trials=16,
+        direction='maximize',
+        scheduler=scheduler,
+        progress_reporter=reporter,
+        local_dir="$SCRATCH/n2c2/ray_results/",
+        name="tune_transformer_hb",
+        log_to_file=True,
+    )
+    
+    print("BEST HYPERPARAMETERS:")
+    print(best_run.hyperparameters)
+    
+    for k,v in best_run.hyperparameters.items():
+        setattr(train_args, k, v)
 
     trainer.train()
     trainer.evaluate()

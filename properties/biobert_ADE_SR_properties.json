@@ -1,0 +1,18 @@
+{
+	"model_params": {
+		"pretrain_path": "$SCRATCH/n2c2/pretrain/biobert-base-cased-v1.2",
+		"out_folder": "$SCRATCH/n2c2/Models/ADE_SR_2023-03-24"
+	},
+	
+	"train_params": {
+		"data_dir": "~/data/ner_data_formatted",
+		"max_len": 250,
+		"learning_rate": 1e-5,
+		"weight_decay": 0.01,
+		"batch_size": 4,
+		"num_epochs": 10,
+		"ckpt_steps": 10,
+		"grad_accumulation_steps": 4
+	},
+	"bad_labels": []
+}

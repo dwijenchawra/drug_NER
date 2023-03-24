@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import numpy as np
 import torch
-from seqeval.metrics import classification_report
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, log_loss
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from string import punctuation
@@ -61,6 +61,46 @@ def prepare_sentence(tokens, positions, mask_ent=False):
     tokens = " ".join(tokens)
     return tokens
 
-def compute_metrics():
-    pass
+def tokenize_sentence_to_ids(tokenizer, sentence):
+    tokens = tokenizer.tokenize(sentence)
+    # Add special tokens
+    if tokens[0] != '[CLS]':
+        tokens.insert(0, '[CLS]')
+    if tokens[-1] != '[SEP]':
+        if tokens[-1] in '.!?;':
+            tokens[-1] = '[SEP]'
+        else:
+            tokens.append('[SEP]')
+    token_ids = tokenizer.convert_tokens_to_ids(tokens)
+    return token_ids
+
+def compute_metrics(out):
+    predictions, labels = out
+    predict_labels = np.argmax(predictions, axis=1)
+    metrics = {
+        "precision": precision_score(labels, predict_labels),
+        "recall": recall_score(labels, predict_labels),
+        "f1": f1_score(labels, predict_labels),
+        "roc_auc": roc_auc_score(labels, predictions[:, 1]),
+        "loss": log_loss(labels, predictions)
+        }
+    return metrics
+
+def compute_class_metrics(preds, labels, classes):
+    unique_classes = sorted(list(set(classes)))
+    metrics = []
+    for cat in unique_classes:
+        class_preds = [(i, j) for i, j, k in zip(preds, labels, classes) if k == cat]
+        preds_, labels_ = zip(*class_preds)
+        metrics.append(
+            {
+                "Label": cat,
+                "Precision": precision_score(labels_, preds_),
+                "Recall": recall_score(labels_, preds_),
+                "F1": f1_score(labels_, preds_),
+                "Support": len(labels_)
+            }
+        )
+    metrics = pd.DataFrame.from_records(metrics)
+    
     

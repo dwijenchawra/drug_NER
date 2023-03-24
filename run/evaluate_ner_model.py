@@ -1,9 +1,11 @@
 import os
+import sys
+sys.path.append("../")
 import json
 from argparse import ArgumentParser
 from datasets import Dataset
 from transformers import DataCollatorForTokenClassification, BertForTokenClassification, BertTokenizer 
-from ner_utilities import *
+from bert.ner.utilities import *
 
 def main():
 
@@ -14,6 +16,7 @@ def main():
     with open(args.config, 'r') as config_file:
         config = json.load(config_file)
         config_file.close()
+    batch_size = 64
     model_params = config["model_params"]
     train_params = config["train_params"]
 
@@ -23,8 +26,9 @@ def main():
 
     # Load Data
     data_path = train_params["data_dir"]
-    test_data_path = os.path.join(data_path, "test_data.tsv")
+    test_data_path = os.path.join(data_path, "test.tsv")
     test_data = load_data(test_data_path)
+    test_data = [(i, j) for i, j in test_data if len(i) > 2 and not all(k=="O" for k in j)]
 
     # Tokenize data
     test_data = [tokenize_with_labels(tokenizer, i, j, '[PAD]') for i, j in test_data if len(i) > 2]
@@ -45,12 +49,15 @@ def main():
     test_tags = [[tag2idx[j] for j in i] for i in test_labels]
     test_tags = np.array([pad_sequence(i, value=tag2idx['[PAD]']) for i in test_tags], dtype='int32')
     attention_masks = [[float(j != 0.0) for j in i] for i in test_inputs]
-    test_dataset = Dataset.from_dict({'input_ids': test_inputs, 'labels': test_tags}).with_format("torch")
+    test_dataset = Dataset.from_dict({'input_ids': test_inputs, 'labels': test_tags, 'attention_mask': attention_masks}).with_format("torch")
 
     # Load model
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cpu")
     model = BertForTokenClassification.from_pretrained(model_params["out_folder"])
-    model.eval()
-    pred, labels = get_label_predictions(model, test_dataset, tag2idx)
+    model = model.eval()
+    model = model.to(device)
+    pred, labels = get_label_predictions(model, test_dataset, tag2idx, batch_size=batch_size, device=device)
     
     # Display Results
     print()

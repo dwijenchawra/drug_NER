@@ -1,3 +1,4 @@
+import re
 import csv
 import pandas as pd
 import numpy as np
@@ -5,6 +6,9 @@ import torch
 from seqeval.metrics import classification_report
 from tqdm import tqdm
 from torch.utils.data import DataLoader
+from deep_utils import stratify_train_test_split_multi_label
+from sklearn.model_selection import train_test_split
+from collections import Counter
 
 def load_data(path):
     data = pd.read_csv(path, header=None, delimiter='\t')
@@ -84,21 +88,55 @@ def pad_sequence(sentence, max_len=200, value=0):
     else:
         return sentence + [value] * (max_len - len(sentence))
 
-def get_label_predictions(model, eval_dataset, tag2idx):
+def get_label_predictions(model, eval_dataset, tag2idx, batch_size=1, device="cpu"):
     true_predictions = []
     true_labels = []
     idx2tag = {v: k for k, v in tag2idx.items()}
     pad_idx = tag2idx['[PAD]']
-    eval_dataloader = DataLoader(eval_dataset, batch_size=1)
+    eval_dataloader = DataLoader(eval_dataset, batch_size=batch_size)
 
     model.eval()
     with torch.no_grad():
         for row in tqdm(eval_dataloader):
-            out = model(row['input_ids']).logits
-            pred = np.argmax(out, axis=-1).squeeze().tolist()
+            x = row['input_ids'].to(device)
+            out = model(x).logits
+            preds = np.argmax(out.cpu(), axis=-1).squeeze().tolist()
             labels = row['labels'].squeeze().tolist()
 
-            true_predictions.append([idx2tag[p] for p, l in zip(pred, labels) if l != pad_idx])
-            true_labels.append([idx2tag[l] for p, l in zip(pred, labels) if l != pad_idx])
+            for pred, label in zip(preds, labels):
+                true_predictions.append([idx2tag[p] for p, l in zip(pred, label) if l != pad_idx])
+                true_labels.append([idx2tag[l] for p, l in zip(pred, label) if l != pad_idx])
     
     return true_predictions, true_labels
+
+def get_train_test_split_multi_label(x, y, attn_masks, test_size, stratify=None):
+    if stratify is None:
+        # Split into Train and Test by random sample
+        train_data, test_data = train_test_split(
+            list(zip(x, y, attn_masks)), test_size=test_size
+            )
+    else:
+        # Split into Train and Test by stratified sample
+        x_train, x_test, y_train, y_test = stratify_train_test_split_multi_label(
+            x=list(range(len(y))), y=stratify, test_size=test_size
+            )
+        x_train = x_train.astype(int)
+        x_test = x_test.astype(int)
+        train_input, train_tags, train_attn = x[x_train], y[x_train], attn_masks[x_train]
+        test_input, test_tags, test_attn = x[x_test], y[x_test], attn_masks[x_test]
+        train_data = list(zip(train_input, train_tags, train_attn))
+        test_data = list(zip(test_input, test_tags, test_attn))
+    
+    return train_data, test_data
+
+def get_entity_type_counts(tags, tag2idx):
+    drop_tags = {'O', '[PAD]'}
+    tag_ents = [
+        [re.sub(r"^[^-]*-", "", j) for j in i if j.startswith("U-") or j.startswith("B-")]
+        for i in tags
+        ]
+    tag_names = sorted(set(re.sub(r"^[^-]*-", "", i) for i in tag2idx.keys() if i not in drop_tags))
+    tag_counts = [Counter(i) for i in tag_ents]
+    tag_counts = np.array([[i[j] for j in tag_names] for i in tag_counts])
+
+    return tag_counts
