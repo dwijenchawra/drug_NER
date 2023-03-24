@@ -47,4 +47,12 @@ The purpose of this lab is to familiarize you with training and evaluating BERT 
 5. Evaluate model against the test set.
 6. If time permits, try testing different hyper-parameter values such as learning_rate, weight_decay, batch_size, and num_epochs. These values can be changed in the configurations file.
 
+## Pretrain Model, Data, and Other File locations:
+
+1. Create a folder `n2c2` in your scratch directory. Inside that, make a folder `pretrain`.
+2. Put the pretrained model `biobert-base-cased-v1.2` in the folder `pretrain` you just made.
+3. In your home directory, make a folder `data` (unless you have one already). Inside `data`, make another folder `ner_data_formatted` and put the `train.tsv` and 'test.tsv' files in it. 
+4. The trained models will be outputted into `$SCRATCH/n2c2/Models` with the name as specified in the configuration file. 
+5. The tensorboard logging data will be outputted to `$SCRATCH/n2c2/ray_results/` with the name as specified in the hyperparameter search function `train_ner_model.py`. You can use `tensorboard --logdir=<log folder>` to view the tensorboard. 
+
 Good luck!
