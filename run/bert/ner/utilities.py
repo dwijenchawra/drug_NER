@@ -104,6 +104,10 @@ def get_label_predictions(model, eval_dataset, tag2idx, batch_size=1, device="cp
             labels = row['labels'].squeeze().tolist()
 
             for pred, label in zip(preds, labels):
+                if not isinstance(pred, (list, np.ndarray)):
+                    pred = [pred]
+                if not isinstance(label, (list, np.ndarray)):
+                    label = [label]
                 true_predictions.append([idx2tag[p] for p, l in zip(pred, label) if l != pad_idx])
                 true_labels.append([idx2tag[l] for p, l in zip(pred, label) if l != pad_idx])
     
