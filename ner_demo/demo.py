@@ -12,6 +12,12 @@ import pandas as pd
 import spacy
 from spacy import displacy
 
+import sys
+
+
+filename = sys.argv[1]
+
+
 
 def load_data(path):
     data = pd.read_csv(path, header=None, delimiter='\t')
