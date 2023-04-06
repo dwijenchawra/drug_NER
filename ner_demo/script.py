@@ -1,4 +1,3 @@
-# %%
 import os
 import sys
 sys.path.append("../")
@@ -45,7 +44,6 @@ def tokenize_with_labels(tokenizer, sent_words, sent_labels, special_label):
 
     return tok_sent, labels
 
-# %%
 # raw_train_data = load_data("../data/ner_data_formatted/train.tsv")
 # raw_test_data = load_data("../data/ner_data_formatted/test.tsv")
 # raw_train_data = [(i, j) for i, j in raw_train_data if len(i) > 2 and not all(k=="O" for k in j)]
@@ -101,56 +99,67 @@ labels = ['B-ADE',
     'U-Strength',
     '[PAD]']
 
-print("Loading test.txt")
-text = ""
-with open("test.txt") as f:
-    text = f.readline()
+
 
 print("Loading pipeline")
 nlp = pipeline("ner", model="/anvil/projects/tdm/corporate/battelle-nl/ADE_NER_2023-02-04_4", tokenizer="bert-base-cased")
 
-print("Running pipeline")
-processed = nlp(text)
 
-pprint(processed[0:5])
+from flask import Flask, render_template, send_from_directory, redirect
+import os
+import subprocess
+
+app = Flask(__name__)
+FILE_DIR = '/path/to/files'  # Replace with the path to your files
+OTHER_SERVER_PORT = 9000
 
 
-# %%
-# pprint(processed)
-processedline = ""
 
-for i in processed:
-    i["label"] = labels[int(i["entity"].split("_")[1])]
-    if i["label"] != 'O':
-        processedline += i["word"] + f" {i['label']} "
-    else:
-        processedline += i["word"] + " "
-    
-print(processedline)
+print("Loading test.txt")
 
-# %%
+# display a menu to pick a file to process
+files = os.listdir("../data/ner_data_formatted/txt/")
+file = files[109]
+
+text = ""
+lines = []
+processedlines = []
+with open(os.path.join("../data/ner_data_formatted/txt/", file)) as f:
+    for line in f:
+        text += line
+        lines.append(line)
+        processedlines.append(nlp(line))
+
+zipped = zip(lines, processedlines)
+
 #process syllables
-combined = []
-for i in range(len(processed)):
-    if processed[i]["word"].startswith('##'):
-        continue
-    # Otherwise, combine it with the next string if it starts with "##"
-    word = processed[i]["word"]
-    start = processed[i]["start"]
-    end = processed[i]["end"]
-    for j in range(i+1, len(processed)):
-        if processed[j]["word"].startswith('##'):
-            word += processed[j]["word"][2:]
-            end = processed[j]["end"]
-        else:
-            break
-    combined.append({"word": word, "entity": processed[i]["entity"], "start": start, "end": end})
+combinedlines = []
 
+currlen = 0
+for item in zipped:
+    processed = item[1]
+    combined = []
+    for i in range(len(processed)):
+        if processed[i]["word"].startswith('##'):
+            continue
+        # Otherwise, combine it with the next string if it starts with "##"
+        word = processed[i]["word"]
+        start = processed[i]["start"]
+        end = processed[i]["end"]
+        for j in range(i+1, len(processed)):
+            if processed[j]["word"].startswith('##'):
+                word += processed[j]["word"][2:]
+                end = processed[j]["end"]
+            else:
+                break
+        # consider the previous end
+        combined.append({"word": word, "entity": processed[i]["entity"], "start": start + currlen, "end": end + currlen})
+    currlen += len(item[0])
+    combinedlines.extend(combined)
 
-
-for i in range(len(combined)):
+for i in range(len(combinedlines)):
     # example output: {'end': None, 'entity': 'LABEL_27', 'index': 131, 'score': 0.9996716, 'start': None, 'word': 'and'}
-    combined[i]["label"] = labels[int(combined[i]["entity"].split("_")[1])]
+    combinedlines[i]["label"] = labels[int(combinedlines[i]["entity"].split("_")[1])]
     # if i == 0:
     #     combined[i]["start"] = 0
     #     combined[i]["end"] = len(combined[i]["word"])
@@ -158,17 +167,21 @@ for i in range(len(combined)):
     #     combined[i]["start"] = combined[i-1]["end"] + 2
     #     combined[i]["end"] = combined[i]["start"] + len(combined[i]["word"])
 
-pprint(combined[10:15])
+pprint(combinedlines[102:150])
     
 # Generate the visualization using displacy module
+# options = {"ents": labels}
 options = {"ents": [ent for ent in labels if ent != "O"]}
-doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combined if i["label"] != "O"]}
+
+print("len of ents")
+print(len(options["ents"]))
+# doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines]}
+doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines if i["label"] != "O"]}
 
 
-# %%
-displacy.serve(doc, style="ent", options=options, manual=True, port=8888)
 
-# %%
+displacy.render(doc, style="ent", options=options, manual=True)
+
 
 
 
