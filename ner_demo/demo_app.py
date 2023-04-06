@@ -9,7 +9,7 @@ OTHER_SERVER_PORT = 8888
 @app.route('/')
 def index():
     file_list = os.listdir(FILE_DIR)
-    buttons = [{'filename': f, 'url': f'http://localhost:8888/{f}'} for f in file_list]
+    buttons = [{'filename': f, 'url': f'http://localhost:8888/download/{f}'} for f in file_list]
     return render_template('./index.html', buttons=buttons)
 
 @app.route('/download/<path:filename>')

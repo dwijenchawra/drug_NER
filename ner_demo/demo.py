@@ -113,9 +113,7 @@ nlp = pipeline("ner", model="/anvil/projects/tdm/corporate/battelle-nl/ADE_NER_2
 
 print("Loading test.txt")
 
-# display a menu to pick a file to process
-files = os.listdir("../data/ner_data_formatted/txt/")
-file = files[109]
+file = filename
 
 text = ""
 lines = []
@@ -176,4 +174,4 @@ doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i[
 
 
 
-displacy.render(doc, style="ent", options=options, manual=True)
+displacy.serve(doc, style="ent", options=options, manual=True, port=8888)
