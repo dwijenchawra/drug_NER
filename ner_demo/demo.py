@@ -172,6 +172,4 @@ print(len(options["ents"]))
 # doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines]}
 doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines if i["label"] != "O"]}
 
-
-
 displacy.serve(doc, style="ent", options=options, manual=True, port=8888)

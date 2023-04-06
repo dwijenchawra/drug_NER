@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>File Selection</title>
-    <style>
-        button {
-            border: none;
-            color: white;
-            background-color: #007bff;
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin: 5px;
-            font-size: 16px;
-            transition: all 0.1s ease-in-out;
-        }
-        button:hover {
-            background-color: #0062cc;
-            cursor: pointer;
-        }
-        button:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
-        }
-        @media only screen and (max-width: 600px) {
-            button {
-                padding: 5px 10px;
-                font-size: 14px;
-            }
-        }
-    </style>
+    <title>File Selector</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Load file list from Flask server
+            $.get('/fileloader', function(data) {
+                var fileDropdown = $('#file-dropdown');
+                fileDropdown.empty();
+                $.each(data, function(index, filename) {
+                    fileDropdown.append($('<option></option>').text(filename));
+                });
+            });
+
+            // Bind button click to call Flask server and display result
+            $('#submit-button').click(function() {
+                var filename = $('#file-dropdown').val();
+                $.get('/nlp/' + filename, function(data) {
+                    $('#result-box').html(data);
+                });
+            });
+        });
+    </script>
 </head>
 <body>
-    {% for button in buttons %}
-        <button onclick="window.location.href='{{ button.url }}'">{{ button.filename }}</button>
-    {% endfor %}
+    <h1>File Selector</h1>
+    <select id="file-dropdown"></select>
+    <br><br>
+    <button id="submit-button">Process File</button>
+    <div id="result-box"></div>
 </body>
 </html>
