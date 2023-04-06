@@ -44,85 +44,130 @@ def tokenize_with_labels(tokenizer, sent_words, sent_labels, special_label):
 
     return tok_sent, labels
 
+# raw_train_data = load_data("../data/ner_data_formatted/train.tsv")
+# raw_test_data = load_data("../data/ner_data_formatted/test.tsv")
+# raw_train_data = [(i, j) for i, j in raw_train_data if len(i) > 2 and not all(k=="O" for k in j)]
+# raw_test_data = [(i, j) for i, j in raw_test_data if len(i) > 2 and not all(k=="O" for k in j)]
 
-def main():
-    # raw_train_data = load_data("../data/ner_data_formatted/train.tsv")
-    # raw_test_data = load_data("../data/ner_data_formatted/test.tsv")
-    # raw_train_data = [(i, j) for i, j in raw_train_data if len(i) > 2 and not all(k=="O" for k in j)]
-    # raw_test_data = [(i, j) for i, j in raw_test_data if len(i) > 2 and not all(k=="O" for k in j)]
+tokenizer = BertTokenizer(vocab_file="/anvil/projects/tdm/corporate/battelle-nl/ADE_NER_2023-02-04_4/vocab.txt", do_lower_case=False)
 
-    tokenizer = BertTokenizer(vocab_file="/anvil/projects/tdm/corporate/battelle-nl/ADE_NER_2023-02-04_4/vocab.txt", do_lower_case=False)
+# # Tokenize data
+# train_data = [tokenize_with_labels(tokenizer, i, j, '[PAD]') for i, j in raw_train_data if len(i) > 2]
+# test_data = [tokenize_with_labels(tokenizer, i, j, '[PAD]') for i, j in raw_test_data if len(i) > 2]
+# train_sents, train_labels = zip(*train_data)
+# test_sents, test_labels = zip(*test_data)
 
-    # # Tokenize data
-    # train_data = [tokenize_with_labels(tokenizer, i, j, '[PAD]') for i, j in raw_train_data if len(i) > 2]
-    # test_data = [tokenize_with_labels(tokenizer, i, j, '[PAD]') for i, j in raw_test_data if len(i) > 2]
-    # train_sents, train_labels = zip(*train_data)
-    # test_sents, test_labels = zip(*test_data)
+# print("Labels:")
+# pprint(set([l for sent in train_labels for l in sent])) 
 
-    # print("Labels:")
-    # pprint(set([l for sent in train_labels for l in sent])) 
+labels = ['B-ADE',
+    'B-Dosage',
+    'B-Drug',
+    'B-Duration',
+    'B-Form',
+    'B-Frequency',
+    'B-Reason',
+    'B-Route',
+    'B-Strength',
+    'I-ADE',
+    'I-Dosage',
+    'I-Drug',
+    'I-Duration',
+    'I-Form',
+    'I-Frequency',
+    'I-Reason',
+    'I-Route',
+    'I-Strength',
+    'L-ADE',
+    'L-Dosage',
+    'L-Drug',
+    'L-Duration',
+    'L-Form',
+    'L-Frequency',
+    'L-Reason',
+    'L-Route',
+    'L-Strength',
+    'O',
+    'U-ADE',
+    'U-Dosage',
+    'U-Drug',
+    'U-Duration',
+    'U-Form',
+    'U-Frequency',
+    'U-Reason',
+    'U-Route',
+    'U-Strength',
+    '[PAD]']
 
-    labels = ['B-ADE',
-        'B-Dosage',
-        'B-Drug',
-        'B-Duration',
-        'B-Form',
-        'B-Frequency',
-        'B-Reason',
-        'B-Route',
-        'B-Strength',
-        'I-ADE',
-        'I-Dosage',
-        'I-Drug',
-        'I-Duration',
-        'I-Form',
-        'I-Frequency',
-        'I-Reason',
-        'I-Route',
-        'I-Strength',
-        'L-ADE',
-        'L-Dosage',
-        'L-Drug',
-        'L-Duration',
-        'L-Form',
-        'L-Frequency',
-        'L-Reason',
-        'L-Route',
-        'L-Strength',
-        'O',
-        'U-ADE',
-        'U-Dosage',
-        'U-Drug',
-        'U-Duration',
-        'U-Form',
-        'U-Frequency',
-        'U-Reason',
-        'U-Route',
-        'U-Strength',
-        '[PAD]']
 
-    print("Loading test.txt")
-    text = ""
-    with open("test.txt") as f:
-        text = f.readline()
+
+print("Loading pipeline")
+nlp = pipeline("ner", model="/anvil/projects/tdm/corporate/battelle-nl/ADE_NER_2023-02-04_4", tokenizer="bert-base-cased")
+
+
+print("Loading test.txt")
+
+# display a menu to pick a file to process
+files = os.listdir("../data/ner_data_formatted/txt/")
+file = files[109]
+
+text = ""
+lines = []
+processedlines = []
+with open(os.path.join("../data/ner_data_formatted/txt/", file)) as f:
+    for line in f:
+        text += line
+        lines.append(line)
+        processedlines.append(nlp(line))
+
+zipped = zip(lines, processedlines)
+
+#process syllables
+combinedlines = []
+
+currlen = 0
+for item in zipped:
+    processed = item[1]
+    combined = []
+    for i in range(len(processed)):
+        if processed[i]["word"].startswith('##'):
+            continue
+        # Otherwise, combine it with the next string if it starts with "##"
+        word = processed[i]["word"]
+        start = processed[i]["start"]
+        end = processed[i]["end"]
+        for j in range(i+1, len(processed)):
+            if processed[j]["word"].startswith('##'):
+                word += processed[j]["word"][2:]
+                end = processed[j]["end"]
+            else:
+                break
+        # consider the previous end
+        combined.append({"word": word, "entity": processed[i]["entity"], "start": start + currlen, "end": end + currlen})
+    currlen += len(item[0])
+    combinedlines.extend(combined)
+
+for i in range(len(combinedlines)):
+    # example output: {'end': None, 'entity': 'LABEL_27', 'index': 131, 'score': 0.9996716, 'start': None, 'word': 'and'}
+    combinedlines[i]["label"] = labels[int(combinedlines[i]["entity"].split("_")[1])]
+    # if i == 0:
+    #     combined[i]["start"] = 0
+    #     combined[i]["end"] = len(combined[i]["word"])
+    # else:
+    #     combined[i]["start"] = combined[i-1]["end"] + 2
+    #     combined[i]["end"] = combined[i]["start"] + len(combined[i]["word"])
+
+pprint(combinedlines[102:150])
     
-    print("Loading pipeline")
-    nlp = pipeline("ner", model="/anvil/projects/tdm/corporate/battelle-nl/ADE_NER_2023-02-04_4", tokenizer=tokenizer)
+# Generate the visualization using displacy module
+# options = {"ents": labels}
+options = {"ents": [ent for ent in labels if ent != "O"]}
 
-    print("Running pipeline")
-    processed = nlp(text)
-    for i in processed:
-        # example output: {'end': None, 'entity': 'LABEL_27', 'index': 131, 'score': 0.9996716, 'start': None, 'word': 'and'}
-        i["label"] = labels[int(i["entity"].split("_")[1])]
-        del i["entity"]
-        
-    # Generate the visualization using displacy module
-    options = {"ents": ["LABEL_27", "LABEL_28"]}
-    displacy.render(doc, style="ent", options=options)
+print("len of ents")
+print(len(options["ents"]))
+# doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines]}
+doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines if i["label"] != "O"]}
 
 
 
-
-
-if __name__ == '__main__':
-    main()
+displacy.render(doc, style="ent", options=options, manual=True)
