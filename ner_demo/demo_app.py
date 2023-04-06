@@ -3,21 +3,22 @@ import os
 import subprocess
 
 app = Flask(__name__)
-FILE_DIR = '/path/to/files'
+FILE_DIR = '../data/ner_data_formatted/txt/'
 OTHER_SERVER_PORT = 8888
 
 @app.route('/')
 def index():
     file_list = os.listdir(FILE_DIR)
-    return render_template('index.html', files=file_list)
+    buttons = [{'filename': f, 'url': f'http://localhost:8888/{f}'} for f in file_list]
+    return render_template('./index.html', buttons=buttons)
 
 @app.route('/download/<path:filename>')
 def download(filename):
     # Run some additional code here
-    subprocess.run(['python', 'ner_processor.py', filename], check=True)
+    subprocess.run(['python', 'demo.py', filename], check=True)
 
     # Redirect to the other server
-    return redirect(f'http://localhost:{OTHER_SERVER_PORT}/{filename}')
+    return redirect(f'http://localhost:{OTHER_SERVER_PORT}/')
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
