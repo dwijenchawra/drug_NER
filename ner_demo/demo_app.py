@@ -174,14 +174,14 @@ def download(filename):
         #     combined[i]["start"] = combined[i-1]["end"] + 2
         #     combined[i]["end"] = combined[i]["start"] + len(combined[i]["word"])
 
-    pprint(combinedlines[102:150])
+    # pprint(combinedlines[102:150])
         
     # Generate the visualization using displacy module
     # options = {"ents": labels}
     options = {"ents": [ent for ent in labels if ent != "O"]}
 
-    print("len of ents")
-    print(len(options["ents"]))
+    # print("len of ents")
+    # print(len(options["ents"]))
     # doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines]}
     doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines if i["label"] != "O"]}
 

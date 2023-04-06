@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>File Selector</title>
+    <title>Battelle NLP NER Model Demo</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -24,8 +24,28 @@
         });
     </script>
 </head>
+<style>
+    #file-dropdown {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    #result-box {
+        align-self: center;
+        bottom: 0;
+        width: 80%;
+        height: 100%;
+        overflow: scroll;
+        padding: 50px;
+        padding-bottom: 5%;
+        background-color: #acacac;
+        border: 1px solid #363636;
+    }
+</style>
 <body>
-    <h1>File Selector</h1>
+    <h1>Battelle NLP NER Model Demo</h1>
     <select id="file-dropdown"></select>
     <br><br>
     <button id="submit-button">Process File</button>
