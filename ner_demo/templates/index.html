@@ -33,22 +33,45 @@
         border-radius: 4px;
     }
     #result-box {
-        align-self: center;
-        bottom: 0;
-        width: 80%;
-        height: 100%;
+        width: 100%;
+        height: calc(100% - 50px);
         overflow: scroll;
-        padding: 50px;
-        padding-bottom: 5%;
         background-color: #acacac;
         border: 1px solid #363636;
     }
+    #container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    #header {
+        width: 100%;
+        background-color: #f1f1f1;
+        padding: 20px;
+        box-sizing: border-box;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+    #content {
+        flex-grow: 1;
+        padding: 20px;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
 </style>
 <body>
-    <h1>Battelle NLP NER Model Demo</h1>
-    <select id="file-dropdown"></select>
-    <br><br>
-    <button id="submit-button">Process File</button>
-    <div id="result-box"></div>
+    <div id="container">
+        <div id="header">
+            <select id="file-dropdown"></select>
+            <br><br>
+            <button id="submit-button">Process File</button>
+        </div>
+        <div id="content">
+            <div id="result-box"></div>
+        </div>
+    </div>
 </body>
+
 </html>

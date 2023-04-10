@@ -126,71 +126,176 @@ def files():
 
 @app.route('/nlp/<path:filename>')
 def download(filename):
-    file = filename
+    with app.app_context():
+        file = filename
 
-    text = ""
-    lines = []
-    processedlines = []
-    with open(os.path.join("../data/ner_data_formatted/txt/", file)) as f:
-        for line in f:
-            text += line
-            lines.append(line)
-            processedlines.append(nlp(line))
-
-    zipped = zip(lines, processedlines)
-
-    #process syllables
-    combinedlines = []
-
-    currlen = 0
-    for item in zipped:
-        processed = item[1]
-        combined = []
-        for i in range(len(processed)):
-            if processed[i]["word"].startswith('##'):
-                continue
-            # Otherwise, combine it with the next string if it starts with "##"
-            word = processed[i]["word"]
-            start = processed[i]["start"]
-            end = processed[i]["end"]
-            for j in range(i+1, len(processed)):
-                if processed[j]["word"].startswith('##'):
-                    word += processed[j]["word"][2:]
-                    end = processed[j]["end"]
-                else:
-                    break
-            # consider the previous end
-            combined.append({"word": word, "entity": processed[i]["entity"], "start": start + currlen, "end": end + currlen})
-        currlen += len(item[0])
-        combinedlines.extend(combined)
-
-    for i in range(len(combinedlines)):
-        # example output: {'end': None, 'entity': 'LABEL_27', 'index': 131, 'score': 0.9996716, 'start': None, 'word': 'and'}
-        combinedlines[i]["label"] = labels[int(combinedlines[i]["entity"].split("_")[1])]
-        # if i == 0:
-        #     combined[i]["start"] = 0
-        #     combined[i]["end"] = len(combined[i]["word"])
-        # else:
-        #     combined[i]["start"] = combined[i-1]["end"] + 2
-        #     combined[i]["end"] = combined[i]["start"] + len(combined[i]["word"])
-
-    # pprint(combinedlines[102:150])
+        text = ""
+        lines = []
+        processedlines = []
+        print("Starting processing")
+        with open(os.path.join("../data/ner_data_formatted/txt/", file)) as f:
+            for line in f:
+                text += line
+                lines.append(line)
+                processedlines.append(nlp(line))
         
-    # Generate the visualization using displacy module
-    # options = {"ents": labels}
-    options = {"ents": [ent for ent in labels if ent != "O"]}
+        print("Processing complete")
 
-    # print("len of ents")
-    # print(len(options["ents"]))
-    # doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines]}
-    doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines if i["label"] != "O"]}
+        zipped = zip(lines, processedlines)
 
-    html = displacy.render(doc, style="ent", options=options, manual=True)
-    
+        #process syllables
+        combinedlines = []
 
-    resp = make_response(html)
-    resp.headers['Content-Type'] = 'text/html'
-    return resp
+        print("<p>Processing syllables</p>")
+
+        currlen = 0
+        for item in zipped:
+            processed = item[1]
+            combined = []
+            for i in range(len(processed)):
+                if processed[i]["word"].startswith('##'):
+                    continue
+                # Otherwise, combine it with the next string if it starts with "##"
+                word = processed[i]["word"]
+                start = processed[i]["start"]
+                end = processed[i]["end"]
+                for j in range(i+1, len(processed)):
+                    if processed[j]["word"].startswith('##'):
+                        word += processed[j]["word"][2:]
+                        end = processed[j]["end"]
+                    else:
+                        break
+                # consider the previous end
+                combined.append({"word": word, "entity": processed[i]["entity"], "start": start + currlen, "end": end + currlen})
+            currlen += len(item[0])
+            combinedlines.extend(combined)
+        
+        print("<p>Syllables processed</p>")
+
+        for i in range(len(combinedlines)):
+            # example output: {'end': None, 'entity': 'LABEL_27', 'index': 131, 'score': 0.9996716, 'start': None, 'word': 'and'}
+            combinedlines[i]["label"] = labels[int(combinedlines[i]["entity"].split("_")[1])]
+            # if i == 0:
+            #     combined[i]["start"] = 0
+            #     combined[i]["end"] = len(combined[i]["word"])
+            # else:
+            #     combined[i]["start"] = combined[i-1]["end"] + 2
+            #     combined[i]["end"] = combined[i]["start"] + len(combined[i]["word"])
+
+        # pprint(combinedlines[102:150])
+            
+        # Generate the visualization using displacy module
+        # options = {"ents": labels}
+
+        print("<p>Rendering visualization</p>")
+
+        colors = {}
+        for label in labels:
+            if label[0] == "B":
+                colors[label] = "rgb(94, 164, 80)"
+            elif label[0] == "I":
+                colors[label] = "rgb(152, 177, 207)"
+            elif label[0] == "L":
+                colors[label] = "rgb(179, 98, 96)"
+            elif label[0] == "U":
+                colors[label] = "rgb(220, 212, 126)"
+
+
+            
+
+        options = {"ents": [ent for ent in labels if ent != "O"], "colors": colors}
+
+        # print("len of ents")
+        # print(len(options["ents"]))
+        # doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines]}
+        doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines if i["label"] != "O"]}
+
+        html = displacy.render(doc, style="ent", options=options, manual=True)
+        
+        resp = make_response(html)
+        resp.headers['Content-Type'] = 'text/html'
+        return resp
+
+# @app.route('/streamnlp/<path:filename>')
+# def newfunction(filename):
+#     def process1():
+#         file = filename
+
+#         text = ""
+#         lines = []
+#         processedlines = []
+#         yield "Starting processing"
+#         with open(os.path.join("../data/ner_data_formatted/txt/", file)) as f:
+#             for line in f:
+#                 text += line
+#                 lines.append(line)
+#                 processedlines.append(nlp(line))
+        
+#         yield "Processing complete"
+
+#         zipped = zip(lines, processedlines)
+
+#         #process syllables
+#         combinedlines = []
+
+#         yield "<p>Processing syllables</p>"
+
+#         currlen = 0
+#         for item in zipped:
+#             processed = item[1]
+#             combined = []
+#             for i in range(len(processed)):
+#                 if processed[i]["word"].startswith('##'):
+#                     continue
+#                 # Otherwise, combine it with the next string if it starts with "##"
+#                 word = processed[i]["word"]
+#                 start = processed[i]["start"]
+#                 end = processed[i]["end"]
+#                 for j in range(i+1, len(processed)):
+#                     if processed[j]["word"].startswith('##'):
+#                         word += processed[j]["word"][2:]
+#                         end = processed[j]["end"]
+#                     else:
+#                         break
+#                 # consider the previous end
+#                 combined.append({"word": word, "entity": processed[i]["entity"], "start": start + currlen, "end": end + currlen})
+#             currlen += len(item[0])
+#             combinedlines.extend(combined)
+        
+#         yield "<p>Syllables processed</p>"
+
+#         for i in range(len(combinedlines)):
+#             # example output: {'end': None, 'entity': 'LABEL_27', 'index': 131, 'score': 0.9996716, 'start': None, 'word': 'and'}
+#             combinedlines[i]["label"] = labels[int(combinedlines[i]["entity"].split("_")[1])]
+#             # if i == 0:
+#             #     combined[i]["start"] = 0
+#             #     combined[i]["end"] = len(combined[i]["word"])
+#             # else:
+#             #     combined[i]["start"] = combined[i-1]["end"] + 2
+#             #     combined[i]["end"] = combined[i]["start"] + len(combined[i]["word"])
+
+#         # pprint(combinedlines[102:150])
+            
+#         # Generate the visualization using displacy module
+#         # options = {"ents": labels}
+
+#         yield "<p>Rendering visualization</p>"
+
+#         options = {"ents": [ent for ent in labels if ent != "O"]}
+
+#         # print("len of ents")
+#         # print(len(options["ents"]))
+#         # doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines]}
+#         doc = {"text": text, "ents": [{"start": i["start"], "end": i["end"], "label": i["label"]} for i in combinedlines if i["label"] != "O"]}
+
+#         html = displacy.render(doc, style="ent", options=options, manual=True)
+        
+#         with app.app_context():
+#             resp = make_response(html)
+#             resp.headers['Content-Type'] = 'text/html'
+#             yield resp
+#     return Response(process1(), mimetype='text/html')
+
 
 @app.route('/test')
 def test():
