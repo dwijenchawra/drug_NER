@@ -3,6 +3,7 @@
 <head>
     <title>Battelle NLP NER Model Demo</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kit.fontawesome.com/61eb020609.js" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function() {
             // Load file list from Flask server
@@ -14,12 +15,30 @@
                 });
             });
 
-            // Bind button click to call Flask server and display result
-            $('#submit-button').click(function() {
-                var filename = $('#file-dropdown').val();
-                $.get('/nlp/' + filename, function(data) {
-                    $('#result-box').html(data);
-                });
+            // // Bind button click to call Flask server and display result
+            // $('#submit-button').click(function() {
+            //     var filename = $('#file-dropdown').val();
+            //     $.get('/nlp/' + filename, function(data) {
+            //     // $.get('/streamnlp/' + filename, function(data) {
+
+            //         $('#result-box').html(data);
+            //     });
+            // });
+            const loadContentButton = document.querySelector('#submit-button');
+            const contentContainer = document.querySelector('#content');
+            const loadingSpinner = document.querySelector('#loading-spinner');
+            loadContentButton.addEventListener('click', async () => {
+                contentContainer.innerHTML = '';
+                // Show the loading spinner
+                loadingSpinner.style.display = 'block';
+                loadingSpinner.style.visibility = 'visible';
+
+                // Make the API request to the Flask endpoint
+                const response = await fetch('/nlp/' + document.querySelector('#file-dropdown').value);
+
+                // Hide the loading spinner and display the content
+                loadingSpinner.style.display = 'none';
+                contentContainer.innerHTML = await response.text();
             });
         });
     </script>
@@ -34,20 +53,21 @@
     }
     #result-box {
         width: 100%;
-        height: calc(100% - 50px);
+        /* height: calc(100% - 50px); */
         overflow: scroll;
         background-color: #acacac;
-        border: 1px solid #363636;
+        /* border: 1px solid #363636; */
     }
     #container {
         display: flex;
         flex-direction: column;
         height: 100%;
-    }
+}
     #header {
         width: 100%;
         background-color: #f1f1f1;
         padding: 20px;
+        margin-bottom: 20px;
         box-sizing: border-box;
         position: fixed;
         top: 0;
@@ -58,17 +78,35 @@
         flex-grow: 1;
         padding: 20px;
         box-sizing: border-box;
-        overflow: hidden;
+        /* overflow: hidden; */
+    }
+    #submit-button {
+        width: 100%;
+        padding: 10px;
+        font-size: 24px;
+        border: 2px solid #5c5c5c;
+        border-radius: 4px;
+    }
+    #file-dropdown {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
     }
 </style>
 <body>
     <div id="container">
         <div id="header">
+            <h1>Battelle NLP Name Entity Recognition Model Demo</h1>
             <select id="file-dropdown"></select>
             <br><br>
             <button id="submit-button">Process File</button>
         </div>
-        <div id="content">
+        <div id="content" style="padding-top: 13%;">
+            <div id="loading-spinner" style="padding-top: 20%; visibility: hidden;">
+                <i class="fa fa-spinner fa-spin"></i>
+            </div>
             <div id="result-box"></div>
         </div>
     </div>
