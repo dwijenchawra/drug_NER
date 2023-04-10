@@ -27,17 +27,26 @@
             const loadContentButton = document.querySelector('#submit-button');
             const contentContainer = document.querySelector('#content');
             const loadingSpinner = document.querySelector('#loading-spinner');
+            const resultBox = document.querySelector('#result-box');
             loadContentButton.addEventListener('click', async () => {
-                contentContainer.innerHTML = '';
-                // Show the loading spinner
-                loadingSpinner.style.display = 'block';
+                // Clear the result box
+                entitiyBox = document.querySelector('.entities');
+                if (entitiyBox) {
+                    entitiyBox.remove();
+                }
+
+                // add loading spinner to content container
+                contentContainer.appendChild(loadingSpinner);
                 loadingSpinner.style.visibility = 'visible';
+                // loadingSpinner.style.display = 'block';
+
+
 
                 // Make the API request to the Flask endpoint
                 const response = await fetch('/nlp/' + document.querySelector('#file-dropdown').value);
 
                 // Hide the loading spinner and display the content
-                loadingSpinner.style.display = 'none';
+                loadingSpinner.style.visibility = 'hidden';
                 contentContainer.innerHTML = await response.text();
             });
         });
@@ -94,6 +103,12 @@
         border: 1px solid #ccc;
         border-radius: 4px;
     }
+    #loading-spinner {
+        background-image: url("https://i.giphy.com/media/hWZBZjMMuMl7sWe0x8/giphy.webp");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 50%;
+    }
 </style>
 <body>
     <div id="container">
@@ -104,9 +119,7 @@
             <button id="submit-button">Process File</button>
         </div>
         <div id="content" style="padding-top: 13%;">
-            <div id="loading-spinner" style="padding-top: 20%; visibility: hidden;">
-                <i class="fa fa-spinner fa-spin"></i>
-            </div>
+            <div id="loading-spinner" style="padding-top: 20%; visibility: hidden;"></div>
             <div id="result-box"></div>
         </div>
     </div>

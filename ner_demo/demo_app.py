@@ -13,9 +13,7 @@ from pprint import pprint
 import pandas as pd
 import time
 from flask import Response, make_response, jsonify
-from threading import Thread
 
-import spacy
 from spacy import displacy
 
 app = Flask(__name__)
