@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Battelle NLP NER Model Demo</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://kit.fontawesome.com/61eb020609.js" crossorigin="anonymous"></script>
@@ -27,84 +30,234 @@
             // files are located at "spacyrenders/"
             fileDropdown.addEventListener('change', (event) => {
                 const file = event.target.value;
-                const url = `spacyrenders/${file}`;
+                const url = `http://127.0.0.1:8888/spacyrenders/${file}`;
                 $.ajax({
                     url: url,
                     success: function(data) {
-                        document.querySelector('#content').innerHTML = data;
+                        document.querySelector('#result-box').innerHTML = data;
                     }
                 });
             });
 
             // select a random file to load on page load
             const randomFile = htmlFiles[Math.floor(Math.random() * htmlFiles.length)];
-            const url = `spacyrenders/${randomFile}`;
+            const url = `http://127.0.0.1:8888/spacyrenders/${randomFile}`;
             $.ajax({
                 url: url,
                 success: function(data) {
-                    document.querySelector('#content').innerHTML = data;
+                    document.querySelector('#result-box').innerHTML = data;
                 }
             });
             fileDropdown.value = randomFile;
         });
     </script>
+    
 </head>
 <style>
-    #file-dropdown {
-        width: 100%;
-        padding: 10px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px; 
+    body, html {
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(270deg, rgba(255,255,255,1) 0%, rgba(229,255,226,1) 59%, rgba(115,231,255,1) 100%);
     }
-    #result-box {
-        width: 100%;
-        /* height: calc(100% - 50px); */
-        overflow: scroll;
-        background-color: #acacac;
-        /* border: 1px solid #363636; */
-    }
+
     #container {
         display: flex;
-        flex-direction: column;
         height: 100%;
-}
-    #header {
-        width: 100%;
-        background-color: #f1f1f1;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-sizing: border-box;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 1;
     }
-    #content {
-        flex-grow: 1;
+
+    #left-column {
+        flex: 30%;
+        margin: 20px;
+        padding: 50px;
+        box-sizing: border-box;
+        background-color: #ffffff;
+        border-radius: 30px 30px 30px 30px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #right-column {
+        flex: 70%;
         padding: 20px;
         box-sizing: border-box;
-        /* overflow: hidden; */
+        border-radius: 0 10px 10px 0;
+        background-color: transparent;
+        color: #fff;
+        height: 100%;
+        overflow: hidden;
     }
+
+    h1 {
+        margin: 0;
+        color: #333333;
+        font-family: sans-serif;
+    }
+
+    p {
+        color: #555555;
+    }
+
     #file-dropdown {
-        width: 100%;
+        width: 50%;
+        margin-bottom: 20px;
         padding: 10px;
         font-size: 16px;
         border: 1px solid #ccc;
         border-radius: 4px;
+        background-color: #ffffff;
+        /* appearance: none; */
+    }
+
+    #result-box {
+        overflow: auto;
+        color: black;
+
+        /* restrict the height of the result box to 100% of the right column */
+        height: 100%;
+
+        font-family: Roboto, sans-serif;
+        font-size: 16px;
+    }
+
+    #result-box::-webkit-scrollbar { 
+        display: none;  /* Safari and Chrome */
+    }
+
+    /* Dark Mode Styles */
+    .darkmode--activated body, .darkmode--activated html {
+        background: linear-gradient(90deg, rgb(114, 45, 45) 0%, rgb(255, 255, 255) 59%, rrgb(255, 0, 0)100%);
+    }
+
+    body.dark-mode {
+        background: linear-gradient(90deg, rgba(0, 0, 0, 1) 0%, rgba(25, 25, 25, 1) 59%, rgba(30, 30, 30, 1) 100%);
+        color: #fff;
+    }
+
+    #left-column.dark-mode {
+        background-color: #333333;
+        color: #fff;
+    }
+
+    #right-column.dark-mode {
+        background-color: #222222;
+        color: #fff;
+    }
+
+
+    
+
+    .down-arrow {
+        position: absolute;
+        top: calc(100vh - 80px);
+        left: calc(50% - 14px);
+        width: 0;
+        height: 30px;
+        border: 2px solid;
+        border-radius: 2px;
+        animation: jumpInfinite 1.5s infinite;
+        color: black;
+    }
+
+    .down-arrow:after {
+        content: " ";
+        position: absolute;
+        top: 12px;
+        left: -10px;
+        width: 16px;
+        height: 16px;
+        border-bottom: 4px solid;
+        border-right: 4px solid;
+        border-radius: 4px;
+        transform: rotateZ(45deg);
+    }
+
+    @keyframes jumpInfinite {
+        0% {
+            margin-top: 0;
+        }
+        50% {
+            margin-top: 20px;
+        }
+        100% {
+            margin-top: 0;
+        }
+    }
+
+    .darkmode--activated .down-arrow {
+        color: white;
+    }
+
+    .entities {
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+
+    .entities .entity {
+        display: inline-block;
+        padding: 2px 2px;
+        margin: 0 0px;
+        border-radius: 10px !important;
+        font-size: 12px;
+        font-weight: bold;
+        color: #fff;
+        line-height: 15px;
     }
 
 </style>
+
 <body>
     <div id="container">
-        <div id="header">
+        <div id="left-column">
             <h1>Battelle NLP Name Entity Recognition Model Demo</h1>
-            <select id="file-dropdown"></select>
+
+            <hr>
+
+            <p>Insert your description and instructions here.</p>
         </div>
-        <div id="content" style="padding-top: 13%;">
+        <div id="right-column">
+            <select id="file-dropdown"></select>
+            <!-- <button id="dark-mode-toggle">Toggle Dark Mode</button> -->
             <div id="result-box"></div>
+            <div class="down-arrow"></div>
         </div>
     </div>
+
+    <script>
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const body = document.body;
+        const leftColumn = document.getElementById('left-column');
+        const rightColumn = document.getElementById('right-column');
+    
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            leftColumn.classList.toggle('dark-mode');
+            rightColumn.classList.toggle('dark-mode');
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+    <script>
+      function addDarkmodeWidget() {
+        const options = {
+            bottom: '32px', // default: '32px'
+            right: '32px', // default: '32px'
+            left: 'unset', // default: 'unset'
+            time: '0.5s', // default: '0.3s'
+            mixColor: '#fff', // default: '#fff'
+            backgroundColor: '#fff',  // default: '#fff'
+            buttonColorDark: '#100f2c',  // default: '#100f2c'
+            buttonColorLight: '#fff', // default: '#fff'
+            saveInCookies: false, // default: true,
+            label: '🌓', // default: ''
+            autoMatchOsTheme: true // default: true
+        }
+
+        const darkmode = new Darkmode(options);
+        darkmode.showWidget();
+      }
+      window.addEventListener('load', addDarkmodeWidget);
+    </script>
 </body>
+
+
 
 </html>
