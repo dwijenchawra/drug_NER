@@ -35,8 +35,16 @@
                     }
                 });
             });
-    
 
+            // select a random file to load on page load
+            const randomFile = htmlFiles[Math.floor(Math.random() * htmlFiles.length)];
+            const url = `spacyrenders/${randomFile}`;
+            $.ajax({
+                url: url,
+                success: function(data) {
+                    document.querySelector('#content').innerHTML = data;
+                }
+            });
         });
     </script>
 </head>
