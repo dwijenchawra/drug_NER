@@ -41,7 +41,7 @@
             });
 
             // select a random file to load on page load
-            const randomFile = htmlFiles[Math.floor(Math.random() * htmlFiles.length)];
+            const file = htmlFiles[Math.floor(Math.random() * htmlFiles.length)];
             // const url = `http://127.0.0.1:8888/spacyrenders/${file}`;
             const url = `spacyrenders/${file}`;
             $.ajax({
