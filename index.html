@@ -40,7 +40,9 @@
                 });
             });
 
-            const file = "124891.html";
+            // select a random file to load on page load
+            const file = "103074.html";
+            // const file = htmlFiles[Math.floor(Math.random() * htmlFiles.length)];
             // const url = `http://127.0.0.1:8888/spacyrenders/${file}`;
             const url = `spacyrenders/${file}`;
             $.ajax({
@@ -49,7 +51,7 @@
                     document.querySelector('#result-box').innerHTML = data;
                 }
             });
-            fileDropdown.value = randomFile;
+            fileDropdown.value = file;
         });
     </script>
     
