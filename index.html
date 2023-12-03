@@ -26,31 +26,55 @@
             const contentContainer = document.querySelector('#content');
             const resultBox = document.querySelector('#result-box');
 
-            // load the content of the selected file into the content container
-            // files are located at "spacyrenders/"
-            fileDropdown.addEventListener('change', (event) => {
-                const file = event.target.value;
-                // const url = `http://127.0.0.1:8888/spacyrenders/${file}`;
-                const url = `spacyrenders/${file}`;
+            function loadFile(u) {
                 $.ajax({
-                    url: url,
+                    url: u,
                     success: function(data) {
                         document.querySelector('#result-box').innerHTML = data;
                     }
                 });
+            }
+
+            // load the content of the selected file into the content container
+            // files are located at "spacyrenders/"
+            fileDropdown.addEventListener('change', (event) => {
+                let file = event.target.value;
+                // const url = `http://127.0.0.1:8888/spacyrenders/${file}`;
+                let url = `spacyrenders/${file}`;
+                loadFile(url);
+            });
+
+            const toggleOriginalButton = document.querySelector('#toggle-original');
+
+            // make a variable to keep track of whether the original model is being displayed
+            let originalModel = false;
+
+            // toggle the original model on and off
+            toggleOriginalButton.addEventListener('click', () => {
+                // if the original model is being displayed, switch to the custom model
+                if (originalModel) {
+                    // get the current file
+                    let file = fileDropdown.value;
+                    let url = `spacyrenders/${file}`;
+                    loadFile(url);
+                    originalModel = false;
+                    toggleOriginalButton.innerHTML = "Original Model Results";
+                } else {
+                    // get the current file
+                    let file = fileDropdown.value;
+                    let url = `origspacyrenders/${file}`;
+                    loadFile(url);
+                    originalModel = true;
+                    toggleOriginalButton.innerHTML = "Trained Model Results";
+                }
             });
 
             // select a random file to load on page load
-            const file = "103074.html";
+            let file = "103074.html";
             // const file = htmlFiles[Math.floor(Math.random() * htmlFiles.length)];
             // const url = `http://127.0.0.1:8888/spacyrenders/${file}`;
-            const url = `spacyrenders/${file}`;
-            $.ajax({
-                url: url,
-                success: function(data) {
-                    document.querySelector('#result-box').innerHTML = data;
-                }
-            });
+            let url = `spacyrenders/${file}`;
+            loadFile(url);
             fileDropdown.value = file;
         });
     </script>
@@ -103,6 +127,17 @@
 
     #file-dropdown {
         width: 50%;
+        margin-bottom: 20px;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #ffffff;
+        /* appearance: none; */
+    }
+
+    #toggle-original {
+        width: 20%;
         margin-bottom: 20px;
         padding: 10px;
         font-size: 16px;
@@ -218,7 +253,8 @@
             <p>Insert your description and instructions here.</p>
         </div>
         <div id="right-column">
-            <select id="file-dropdown"></select>
+            <select id="file-dropdown"></select> 
+            <button id="toggle-original">Original Model Results</button>
             <!-- <button id="dark-mode-toggle">Toggle Dark Mode</button> -->
             <div id="result-box"></div>
             <div class="down-arrow"></div>
