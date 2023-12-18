@@ -129,6 +129,10 @@
         color: #555555;
     }
 
+    #left-column p {
+        color: black;
+    }
+
     #file-dropdown {
         width: 50%;
         margin-bottom: 20px;
@@ -271,30 +275,32 @@
             <a href="https://github.com/dwijenchawra/drug_NER">Github Repo</a>
             <p>                
                 This demo shows the results of a custom NER model trained on a dataset of medical doctor's notes (<a href="https://academic.oup.com/jamia/article-abstract/27/1/3/5581277?redirectedFrom=fulltext">Harvard N2C2 ADE Dataset</a>). The model was trained using HuggingFace Transformers and Pytorch, and visualized using the spaCy library. The model was trained to recognize the following entities:
+            </p>
 
-                <ul>
-                    <li>Adverse Drug Event</li>
-                    <li>Dosage of drug</li>
-                    <li>Drug Name</li>
-                    <li>Duration of dose</li>
-                    <li>Pill, IV, Liquid, etc.</li>
-                    <li>Frequency of dose</li>
-                    <li>Reason</li>
-                    <li>Method of administration</li>
-                    <li>Strength of drug</li>
-                </ul>
+            <ul>
+                <li>Adverse Drug Event</li>
+                <li>Dosage of drug</li>
+                <li>Drug Name</li>
+                <li>Duration of dose</li>
+                <li>Pill, IV, Liquid, etc.</li>
+                <li>Frequency of dose</li>
+                <li>Reason</li>
+                <li>Method of administration</li>
+                <li>Strength of drug</li>
+            </ul>
 
-                BILOU tagging was used to annotate the data. 
+            BILOU tagging was used to annotate the data. 
 
-                <ul>
-                    <li>B-   Beginning</li>
-                    <li>I-   Inside</li>
-                    <li>L-   Last</li>
-                    <li>U-   Single word</li>
-                    <li>O-   Outside</li>
-                </ul>
+            <ul>
+                <li>B-   Beginning</li>
+                <li>I-   Inside</li>
+                <li>L-   Last</li>
+                <li>U-   Single word</li>
+                <li>O-   Outside</li>
+            </ul>
 
-                <b>Training Improvements:</b>
+            <b>Training Improvements:</b>
+            <p>
                 We wrapped the HuggingFace Trainer in a Ray Tune Trainer to optimize hyperparameters using the ASHA Hyperband algorithm. We also tried bandits but found better performance using ASHA. All training was done on A 4xA100 GPU server from Purdue's <a href="https://rcac.purdue.edu/compute/anvil">Anvil Supercomputer</a>. We focused on maximizing the F1 score for entity classification.
             </p>
         </div>
