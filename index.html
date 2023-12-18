@@ -164,7 +164,7 @@
 
     /* Dark Mode Styles */
     .darkmode--activated body, .darkmode--activated html {
-        background: linear-gradient(90deg, rgb(114, 45, 45) 0%, rgb(255, 255, 255) 59%, rrgb(255, 0, 0)100%);
+        background: #313131;
     }
 
     body.dark-mode {
@@ -172,8 +172,8 @@
         color: #fff;
     }
 
-    #left-column.dark-mode {
-        background-color: #333333;
+    .darkmode--activated #left-column {
+        background-color: #161616;
         color: #fff;
     }
 
@@ -241,6 +241,21 @@
         line-height: 15px;
     }
 
+    .legend {
+        width: 100%;
+        color: black;
+        display: flex;
+        padding-bottom: 10px;
+    }
+
+    .leg {
+        padding: 0.45em 0.6em;
+        margin: 0 0.25em;
+        box-shadow: 2px 4px 4px rgba(0, 0, 0, 0.699);
+        border-radius: 0.35em;
+        line-height: 15px;
+        background-color: #feffff;
+    }
 </style>
 
 <body>
@@ -250,11 +265,60 @@
 
             <hr>
 
-            <p>Insert your description and instructions here.</p>
+            <p>
+                This demo shows the results of a custom NER model trained on a dataset of medical doctor's notes (<a href="https://academic.oup.com/jamia/article-abstract/27/1/3/5581277?redirectedFrom=fulltext">Harvard N2C2 ADE Dataset</a>). The model was trained using HuggingFace Transformers and Pytorch, and visualized using the spaCy library. The model was trained to recognize the following entities:
+
+                <ul>
+                    <li>Adverse Drug Event</li>
+                    <li>Dosage of drug</li>
+                    <li>Drug Name</li>
+                    <li>Duration of dose</li>
+                    <li>Pill, IV, Liquid, etc.</li>
+                    <li>Frequency of dose</li>
+                    <li>Reason</li>
+                    <li>Method of administration</li>
+                    <li>Strength of drug</li>
+                </ul>
+
+                BILOU tagging was used to annotate the data. 
+
+                <ul>
+                    <li>B-   Beginning</li>
+                    <li>I-   Inside</li>
+                    <li>L-   Last</li>
+                    <li>U-   Single word</li>
+                    <li>O-   Outside</li>
+                </ul>
+
+                <b>Training Improvements:</b>
+                We wrapped the HuggingFace Trainer in a Ray Tune Trainer to optimize hyperparameters using the ASHA Hyperband algorithm. We also tried bandits but found better performance using ASHA. All training was done on A 4xA100 GPU server from Purdue's <a href="https://rcac.purdue.edu/compute/anvil">Anvil Supercomputer</a>. We focused on maximizing the F1 score for entity classification.
+            </p>
         </div>
         <div id="right-column">
             <select id="file-dropdown"></select> 
             <button id="toggle-original">Original Model Results</button>
+            <!-- <div class="legend">
+                <span class="leg">Legend:   </span>
+                <span class="leg">B-   Beginning</span>
+                <span class="leg">I-   Inside</span>
+                <span class="leg">L-   Last</span>
+                <span class="leg">U-   Single word</span>
+                <span class="leg">O-   Outside</span>
+            </div>
+            <div class="legend">
+                <span class="leg" style="visibility: hidden;">Legend:   </span>
+                <span class="leg">ADE: Adverse Drug Event</span>
+                <span class="leg">Dosage: Dosage of drug</span>
+                <span class="leg">Drug: Drug Name</span>
+                <span class="leg">Duration: Duration of dose</span>
+                <span class="leg">Form: Pill, IV, Liquid, etc.</span>
+                <span class="leg">Frequency: Frequency of dose</span>
+                <span class="leg">Reason</span>
+                <span class="leg">Route: Method of administration</span>
+                <span class="leg">Strength: Strength of drug</span>
+
+            </div> -->
+
             <!-- <button id="dark-mode-toggle">Toggle Dark Mode</button> -->
             <div id="result-box"></div>
             <div class="down-arrow"></div>
@@ -281,7 +345,7 @@
             right: '32px', // default: '32px'
             left: 'unset', // default: 'unset'
             time: '0.5s', // default: '0.3s'
-            mixColor: '#fff', // default: '#fff'
+            mixColor: '#fff', // default: '#fff'®®
             backgroundColor: '#fff',  // default: '#fff'
             buttonColorDark: '#100f2c',  // default: '#100f2c'
             buttonColorLight: '#fff', // default: '#fff'
@@ -293,7 +357,7 @@
         const darkmode = new Darkmode(options);
         darkmode.showWidget();
       }
-    //   window.addEventListener('load', addDarkmodeWidget);
+      window.addEventListener('load', addDarkmodeWidget);
     </script>
 </body>
 
