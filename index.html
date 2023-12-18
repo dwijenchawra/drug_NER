@@ -81,11 +81,15 @@
     
 </head>
 <style>
-    body, html {
+    body {
         height: 100vh;
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
+        background: linear-gradient(270deg, rgba(255,255,255,1) 0%, rgba(229,255,226,1) 59%, rgba(115,231,255,1) 100%);
+    }
+
+    .darkmode-background {
         background: linear-gradient(270deg, rgba(255,255,255,1) 0%, rgba(229,255,226,1) 59%, rgba(115,231,255,1) 100%);
     }
 
@@ -163,7 +167,7 @@
     }
 
     /* Dark Mode Styles */
-    .darkmode--activated body, .darkmode--activated html {
+    .darkmode--activated body {
         background: #313131;
     }
 
@@ -325,7 +329,7 @@
         </div>
     </div>
 
-    <script>
+    <!-- <script>
         const darkModeToggle = document.getElementById('dark-mode-toggle');
         const body = document.body;
         const leftColumn = document.getElementById('left-column');
@@ -346,7 +350,7 @@
             left: 'unset', // default: 'unset'
             time: '0.5s', // default: '0.3s'
             mixColor: '#fff', // default: '#fff'®®
-            backgroundColor: '#fff',  // default: '#fff'
+            backgroundColor: '#ffffff00',  // default: '#fff'
             buttonColorDark: '#100f2c',  // default: '#100f2c'
             buttonColorLight: '#fff', // default: '#fff'
             saveInCookies: false, // default: true,
@@ -357,10 +361,7 @@
         const darkmode = new Darkmode(options);
         darkmode.showWidget();
       }
-      window.addEventListener('load', addDarkmodeWidget);
+      window.addEventListener('load', addDarkmodeWidget); -->
     </script>
 </body>
-
-
-
 </html>
