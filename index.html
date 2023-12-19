@@ -90,6 +90,7 @@
         --bg-color: linear-gradient(270deg, rgba(255, 255, 255, 1) 0%, rgba(229, 255, 226, 1) 59%, rgba(115, 231, 255, 1) 100%);
         --heading-color: #000000;
         --link-color: #0000EE;
+        --result-box-text-color: #000000;
     }
 
     [data-theme="dark"] {
@@ -100,6 +101,7 @@
         --bg-color: #5d5d5d;
         --heading-color: #fff;
         --link-color: #25b3ff;
+        --result-box-text-color: #fff;
     }
 
     body {
@@ -181,7 +183,7 @@
 
     #result-box {
         overflow: auto;
-        color: var(--secondary-color);
+        color: var(--result-box-text-color);
         transition: color 0.5s;
 
         /* restrict the height of the result box to 100% of the right column */
