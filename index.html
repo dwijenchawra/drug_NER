@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://kit.fontawesome.com/61eb020609.js" crossorigin="anonymous"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Load the dropdown with the html files in the html folder
             const fileDropdown = document.querySelector('#file-dropdown');
             const htmlFiles = ['124891.html', '113824.html', '114965.html', '127356.html', '198406.html', '110863.html', '121514.html', '111458.html', '143451.html', '114836.html', '103074.html', '124307.html', '117871.html', '130153.html', '192877.html', '122093.html', '124917.html', '145012.html', '101566.html', '110727.html', '101136.html', '109697.html', '102937.html', '122733.html', '168936.html', '109176.html', '112628.html', '112014.html', '115143.html', '110068.html', '121467.html', '108073.html', '161384.html', '157609.html', '109770.html', '106939.html', '120237.html', '108032.html', '108658.html', '168331.html', '178331.html', '143562.html', '114513.html', '190056.html', '113813.html', '100229.html', '104682.html', '102668.html', '105050.html', '109566.html', '118418.html', '128041.html', '102629.html', '191016.html', '102296.html', '116451.html', '102557.html', '130076.html', '189471.html', '109527.html', '151904.html', '174037.html', '134445.html', '109784.html', '105027.html', '112832.html', '144301.html', '106575.html', '115267.html', '118510.html', '121915.html', '172474.html', '119069.html', '131903.html', '102019.html', '186788.html', '141586.html', '109170.html', '101813.html', '102045.html', '105104.html', '107139.html', '108809.html', '105954.html', '104979.html', '100039.html', '104095.html', '174143.html', '107251.html', '102053.html', '182040.html', '184696.html', '103639.html', '110445.html', '110384.html', '114144.html', '109633.html', '151688.html', '187852.html', '187782.html', '101215.html', '112747.html', '101665.html', '100035.html', '115667.html', '101331.html', '103926.html', '108901.html', '127741.html', '130440.html', '114959.html', '191162.html', '103377.html', '102136.html', '107322.html', '106026.html', '102527.html', '187736.html', '114735.html', '110326.html', '114220.html', '102967.html', '118243.html', '115021.html', '112249.html', '106621.html', '196798.html', '114923.html', '122057.html', '110521.html', '127263.html', '102087.html', '104850.html', '160707.html', '115191.html', '123324.html', '112615.html', '107047.html', '117745.html', '195784.html', '105778.html', '197869.html', '112140.html', '103317.html', '104107.html', '100847.html', '193517.html', '105254.html', '108889.html', '117156.html', '131434.html', '103142.html', '113705.html', '100579.html', '111041.html', '102456.html', '106415.html', '149687.html', '185800.html', '182003.html', '101779.html', '100187.html', '105106.html', '111542.html', '105014.html', '111923.html', '106423.html', '112030.html', '125206.html', '101427.html', '115464.html', '104799.html', '119144.html', '116966.html', '147292.html', '177331.html', '110037.html', '188551.html', '101276.html', '113524.html', '103877.html', '120301.html', '177370.html', '161477.html', '108411.html', '100922.html', '157284.html', '102698.html', '109191.html', '101372.html', '155980.html', '192798.html', '177721.html', '111298.html', '153141.html', '114976.html', '106361.html', '120253.html', '102027.html', '106064.html', '178143.html', '109450.html', '176448.html', '108754.html', '103677.html', '122468.html', '115432.html', '105445.html', '104468.html', '104653.html', '175593.html', '103315.html', '110186.html', '111447.html', '109866.html', '101410.html', '176106.html', '113840.html', '109667.html', '159079.html', '129286.html', '114452.html', '117907.html', '164253.html', '103293.html', '115347.html', '107058.html', '182160.html', '102173.html', '160574.html', '150068.html', '127944.html', '109617.html', '117609.html', '126380.html', '123244.html', '152612.html', '118694.html', '166834.html', '111323.html', '105360.html', '164366.html', '195689.html', '190444.html', '128652.html', '105747.html', '101092.html', '106038.html', '115244.html', '105614.html', '116604.html', '125867.html', '123771.html', '118564.html', '100590.html', '107255.html', '123589.html', '104091.html', '102283.html', '119573.html', '111840.html', '116901.html', '113200.html', '112368.html', '107869.html', '115157.html', '174150.html', '104710.html', '108949.html', '100883.html', '123475.html', '105547.html', '101857.html', '168831.html', '106384.html', '114585.html', '110342.html', '106629.html', '116853.html', '114680.html', '149614.html', '114004.html', '113391.html', '108932.html', '111882.html', '100564.html', '115789.html', '102365.html', '110499.html', '115232.html', '102324.html', '120605.html', '107872.html', '117872.html', '114248.html', '186134.html', '110335.html', '103722.html', '100677.html', '185759.html', '186876.html', '168915.html', '157352.html'];
@@ -29,7 +30,7 @@
             function loadFile(u) {
                 $.ajax({
                     url: u,
-                    success: function(data) {
+                    success: function (data) {
                         document.querySelector('#result-box').innerHTML = data;
                     }
                 });
@@ -78,19 +79,36 @@
             fileDropdown.value = file;
         });
     </script>
-    
+
 </head>
 <style>
+    :root {
+        --primary-color: #ffffff;
+        --secondary-color: #8f8f8f;
+        --font-color: #000000;
+        --entity-color: #FFFFFF;
+        --bg-color: linear-gradient(270deg, rgba(255, 255, 255, 1) 0%, rgba(229, 255, 226, 1) 59%, rgba(115, 231, 255, 1) 100%);
+        --heading-color: #000000;
+        --link-color: #0000EE;
+    }
+
+    [data-theme="dark"] {
+        --primary-color: #3e3e3e;
+        --secondary-color: #eeeeee;
+        --font-color: #fff;
+        --entity-color: #000000;
+        --bg-color: #5d5d5d;
+        --heading-color: #fff;
+        --link-color: #25b3ff;
+    }
+
     body {
         height: 100vh;
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
-        background: linear-gradient(270deg, rgba(255,255,255,1) 0%, rgba(229,255,226,1) 59%, rgba(115,231,255,1) 100%);
-    }
-
-    .darkmode-background {
-        background: linear-gradient(270deg, rgba(255,255,255,1) 0%, rgba(229,255,226,1) 59%, rgba(115,231,255,1) 100%);
+        background-color: var(--bg-color);
+        transition: background-color 0.5s;
     }
 
     #container {
@@ -103,7 +121,8 @@
         margin: 20px;
         padding: 50px;
         box-sizing: border-box;
-        background-color: #ffffff;
+        background-color: var(--primary-color);
+        transition: background-color 0.5s;
         border-radius: 30px 30px 30px 30px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -114,23 +133,26 @@
         box-sizing: border-box;
         border-radius: 0 10px 10px 0;
         background-color: transparent;
-        color: #fff;
+        color: #FFFFFF00;
         height: 100%;
         overflow: hidden;
     }
 
     h1 {
         margin: 0;
-        color: #333333;
+        color: var(--font-color);
+        transition: color 0.5s;
         font-family: sans-serif;
     }
 
     p {
-        color: #555555;
+        color: var(--font-color);
+        transition: color 0.5s;
     }
 
     #left-column p {
-        color: black;
+        color: var(--font-color);
+        transition: color 0.5s;
     }
 
     #file-dropdown {
@@ -140,7 +162,8 @@
         font-size: 16px;
         border: 1px solid #ccc;
         border-radius: 4px;
-        background-color: #ffffff;
+        background-color: var(--secondary-color);
+        transition: background-color 0.5s;
         /* appearance: none; */
     }
 
@@ -151,13 +174,15 @@
         font-size: 16px;
         border: 1px solid #ccc;
         border-radius: 4px;
-        background-color: #ffffff;
+        background-color: var(--secondary-color);
+        transition: background-color 0.5s;
         /* appearance: none; */
     }
 
     #result-box {
         overflow: auto;
-        color: black;
+        color: var(--secondary-color);
+        transition: color 0.5s;
 
         /* restrict the height of the result box to 100% of the right column */
         height: 100%;
@@ -166,32 +191,10 @@
         font-size: 16px;
     }
 
-    #result-box::-webkit-scrollbar { 
-        display: none;  /* Safari and Chrome */
+    #result-box::-webkit-scrollbar {
+        display: none;
+        /* Safari and Chrome */
     }
-
-    /* Dark Mode Styles */
-    .darkmode--activated body {
-        background: #313131;
-    }
-
-    body.dark-mode {
-        background: linear-gradient(90deg, rgba(0, 0, 0, 1) 0%, rgba(25, 25, 25, 1) 59%, rgba(30, 30, 30, 1) 100%);
-        color: #fff;
-    }
-
-    .darkmode--activated #left-column {
-        background-color: #161616;
-        color: #fff;
-    }
-
-    #right-column.dark-mode {
-        background-color: #222222;
-        color: #fff;
-    }
-
-
-    
 
     .down-arrow {
         position: absolute;
@@ -202,7 +205,8 @@
         border: 2px solid;
         border-radius: 2px;
         animation: jumpInfinite 1.5s infinite;
-        color: black;
+        color: var(--font-color);
+        transition: color 0.5s;
     }
 
     .down-arrow:after {
@@ -222,16 +226,14 @@
         0% {
             margin-top: 0;
         }
+
         50% {
             margin-top: 20px;
         }
+
         100% {
             margin-top: 0;
         }
-    }
-
-    .darkmode--activated .down-arrow {
-        color: white;
     }
 
     .entities {
@@ -245,7 +247,8 @@
         border-radius: 10px !important;
         font-size: 12px;
         font-weight: bold;
-        color: #fff;
+        color: var(--entity-color);
+        transition: color 0.5s;
         line-height: 15px;
     }
 
@@ -264,6 +267,79 @@
         line-height: 15px;
         background-color: #feffff;
     }
+
+
+    /* gotten from online */
+    .theme-switch-wrapper {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        align-items: center;
+
+        em {
+            margin-left: 10px;
+            font-size: 1rem;
+        }
+    }
+
+    .theme-switch {
+        display: inline-block;
+        height: 34px;
+        position: relative;
+        width: 60px;
+    }
+
+    .theme-switch input {
+        display: none;
+    }
+
+    ul li {
+        color: var(--font-color);
+        transition: color 0.5s;
+    }
+
+    a {
+        color: var(--link-color);
+        transition: color 0.5s;
+    }
+
+    .slider {
+        background-color: #ccc;
+        bottom: 0;
+        cursor: pointer;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: .4s;
+    }
+
+    .slider:before {
+        background-color: #fff;
+        bottom: 4px;
+        content: "";
+        height: 26px;
+        left: 4px;
+        position: absolute;
+        transition: .4s;
+        width: 26px;
+    }
+
+    input:checked+.slider {
+        background-color: #474747;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(26px);
+    }
+
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
 </style>
 
 <body>
@@ -273,8 +349,11 @@
 
             <hr>
             <a href="https://github.com/dwijenchawra/drug_NER">Github Repo</a>
-            <p>                
-                This demo shows the results of a custom NER model trained on a dataset of medical doctor's notes (<a href="https://academic.oup.com/jamia/article-abstract/27/1/3/5581277?redirectedFrom=fulltext">Harvard N2C2 ADE Dataset</a>). The model was trained using HuggingFace Transformers and Pytorch, and visualized using the spaCy library. The model was trained to recognize the following entities:
+            <p>
+                This demo shows the results of a custom NER model trained on a dataset of medical doctor's notes (<a
+                    href="https://academic.oup.com/jamia/article-abstract/27/1/3/5581277?redirectedFrom=fulltext">Harvard
+                    N2C2 ADE Dataset</a>). The model was trained using HuggingFace Transformers and Pytorch, and
+                visualized using the spaCy library. The model was trained to recognize the following entities:
             </p>
 
             <ul>
@@ -289,23 +368,26 @@
                 <li>Strength of drug</li>
             </ul>
 
-            BILOU tagging was used to annotate the data. 
+            <p>BILOU tagging was used to annotate the data.</p>
 
             <ul>
-                <li>B-   Beginning</li>
-                <li>I-   Inside</li>
-                <li>L-   Last</li>
-                <li>U-   Single word</li>
-                <li>O-   Outside</li>
+                <li>B- Beginning</li>
+                <li>I- Inside</li>
+                <li>L- Last</li>
+                <li>U- Single word</li>
+                <li>O- Outside</li>
             </ul>
 
-            <b>Training Improvements:</b>
+            <p><b>Training Improvements:</b></p>
             <p>
-                We wrapped the HuggingFace Trainer in a Ray Tune Trainer to optimize hyperparameters using the ASHA Hyperband algorithm. We also tried bandits but found better performance using ASHA. All training was done on A 4xA100 GPU server from Purdue's <a href="https://rcac.purdue.edu/compute/anvil">Anvil Supercomputer</a>. We focused on maximizing the F1 score for entity classification.
+                We wrapped the HuggingFace Trainer in a Ray Tune Trainer to optimize hyperparameters using the ASHA
+                Hyperband algorithm. We also tried bandits but found better performance using ASHA. All training was
+                done on A 4xA100 GPU server from Purdue's <a href="https://rcac.purdue.edu/compute/anvil">Anvil
+                    Supercomputer</a>. We focused on maximizing the F1 score for entity classification.
             </p>
         </div>
         <div id="right-column">
-            <select id="file-dropdown"></select> 
+            <select id="file-dropdown"></select>
             <button id="toggle-original">Original Model Results</button>
             <!-- <div class="legend">
                 <span class="leg">Legend:   </span>
@@ -334,6 +416,40 @@
             <div class="down-arrow"></div>
         </div>
     </div>
+
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider round"></div>
+        </label>
+    </div>
+
+    <script>
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+        
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            else {        document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }    
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+
+    </script>
 
     <!-- <script>
         const darkModeToggle = document.getElementById('dark-mode-toggle');
@@ -367,7 +483,8 @@
         const darkmode = new Darkmode(options);
         darkmode.showWidget();
       }
-      window.addEventListener('load', addDarkmodeWidget); -->
-    </script>
+      window.addEventListener('load', addDarkmodeWidget);
+    </script> -->
 </body>
+
 </html>
